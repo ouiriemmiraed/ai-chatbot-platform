@@ -46,7 +46,6 @@ RAPPORT_*.md
 !.env.example
 
 # --- IDEs and Editors ---
-.vscode/
 .idea/
 *.swp
 *.swo
@@ -81,3 +80,7 @@ docker-compose.override.yml
 # package-lock.json
 # yarn.lock
 temp/
+branch_structure.json
+temp_auto_push.bat
+temp_interactive_push.bat
+.gitignore
