@@ -1,0 +1,185 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
+
+/*
+  Theme tokens (updated)
+  - Light tokens are defined in :root
+  - Dark-mode overrides are applied under body.theme-dark
+  - OS preference is respected via prefers-color-scheme
+*/
+
+:root {
+  /* Light mode tokens (default) */
+  --primary: #4F46E5; /* Indigo-600 */
+  --primary-hover: #4338CA; /* Indigo-700 */
+  --primary-light: #EEF2FF;
+  --primary-subtle: #F5F7FF;
+  /* Primary color in RGB for translucent tints */
+  --primary-rgb: 79,70,229;
+
+  --accent: #ef4444;
+  --accent-hover: #dc2626;
+
+  --background: #DCE5EE8A; /* page background tuned to sit under the Cool Slate sidebar */
+  --surface: #FFFFFF;
+  --surface-on: #FFFFFF; /* text/icons on primary/surface backgrounds */
+  --surface-hover: #F8FAFF;
+  --surface-elevated: #FFFFFF;
+
+  --text-primary: #0F1724; /* deep, warm black for best contrast */
+  --text-secondary: #334155;
+  --text-tertiary: #64748B;
+
+  --border: #e6eefc;
+  --border-light: #f1f5f9;
+  --border-focus: #c7d2fe;
+
+  /* Cool Slate — Light variant */
+  --sidebar-bg: #F7F9FB; /* soft cool neutral */
+  --header-bg: #ECF0F400; /* transparent tint per request */
+  --sidebar-text: #0F1724;
+  --sidebar-text-active: #475569; /* slate accent */
+  --sidebar-bg-active: rgba(71,85,105,0.06);
+  --sidebar-border: #E9EFF6;
+
+  --success: #10b981;
+  --success-subtle: #ecfdf5;
+  --warning: #f59e0b;
+  --warning-subtle: #fffbeb;
+  --danger: #ef4444;
+  --danger-subtle: #fef2f2;
+  --info: #0ea5e9;
+  --info-subtle: #f0f9ff;
+
+  --shadow-sm: 0 2px 6px rgba(16,24,40,0.04);
+  --shadow-md: 0 8px 30px rgba(16,24,40,0.06);
+  --shadow-lg: 0 12px 36px rgba(16,24,40,0.08);
+  --shadow-xl: 0 20px 48px rgba(16,24,40,0.10);
+  --shadow-premium: 0 0 0 1px rgba(16,24,40,0.04), 0 8px 30px rgba(16,24,40,0.08);
+
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-full: 9999px;
+
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Dark theme overrides: add `body.theme-dark` to force dark mode */
+body.theme-dark {
+  /* Dark mode tokens (refined for accessibility and depth) */
+  --primary: #8B5CF6; /* violet-500, readable on dark */
+  --primary-hover: #7C3AED;
+  --primary-rgb: 139,92,246;
+
+  --accent: #f87171;
+
+  --background: #061226; /* dark page background tuned to sit beside the Cool Slate sidebar */
+  --surface: #0D1724; /* card surfaces */
+  --surface-hover: #0F1A2B;
+  --surface-elevated: #081221;
+
+  /* Subtle tints for buttons/badges in dark mode */
+  --primary-subtle: rgba(139,92,246,0.08);
+  --success-subtle: rgba(16,185,129,0.06);
+  --danger-subtle: rgba(239,68,68,0.06);
+
+  --text-primary: #E6EEF8;
+  --text-secondary: #B9C6E6;
+  --text-tertiary: #94A3B8;
+
+  --border: rgba(255,255,255,0.06);
+  --border-light: rgba(255,255,255,0.03);
+  --border-focus: rgba(124,58,237,0.35);
+
+  /* Cool Slate — Dark variant */
+  --sidebar-bg: #071427; /* neutral deep slate */
+  --header-bg: #061226; /* match the dark background */
+  --sidebar-text: #E6EEF8;
+  --sidebar-text-active: #9CA3AF; /* cool slate accent */
+  --sidebar-bg-active: rgba(156,163,175,0.06);
+  --sidebar-border: rgba(255,255,255,0.04);
+
+  --shadow-sm: 0 2px 6px rgba(2,6,23,0.6);
+  --shadow-md: 0 8px 30px rgba(2,6,23,0.6);
+}
+
+/* Respect user's OS color preference by default, unless overridden */
+@media (prefers-color-scheme: dark) {
+  body:not(.theme-light) {
+    --primary: #8B5CF6;
+    --primary-hover: #7C3AED;
+    --primary-rgb: 139,92,246;
+    --background: #0b1220;
+    --surface: #0f1724;
+    --surface-hover: #111827;
+    --text-primary: #e6eefc;
+    --sidebar-bg: #071427;
+    --sidebar-text: #e6eefc;
+    --sidebar-text-active: #9CA3AF;
+    --header-bg: #061226;
+  }
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--background);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Outfit', 'Inter', sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  font-family: 'Outfit', sans-serif;
+  color: var(--primary);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}

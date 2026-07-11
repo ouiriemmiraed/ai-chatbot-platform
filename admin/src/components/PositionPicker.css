@@ -1,0 +1,130 @@
+.position-picker-container {
+    width: 100%;
+}
+
+.picker-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.screen-mockup {
+    width: 100%;
+    height: 200px;
+    background-color: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    position: relative;
+    cursor: crosshair;
+    overflow: hidden;
+    transition: border-color 0.2s;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.screen-mockup:hover {
+    border-color: var(--primary);
+}
+
+.screen-content {
+    padding: 20px;
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.line {
+    height: 8px;
+    background-color: var(--border);
+    margin-bottom: 12px;
+    border-radius: 4px;
+}
+
+.line-1 {
+    width: 80%;
+}
+
+.line-2 {
+    width: 90%;
+}
+
+.line-3 {
+    width: 60%;
+}
+
+.widget-dot {
+    width: 20px;
+    height: 20px;
+    background-color: var(--primary);
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(var(--primary-rgb),0.5);
+    transform: translate(50%, 50%);
+    /* Center click on cursor roughly */
+}
+
+/* Adjust transform based on position to keep dot inside */
+/* We can't easily do dynamic css depending on props here without styled-components, 
+   so we'll just center it by default or assume the user clicks reasonably.
+   Actually, usually we want the corner of the widget to be at the position.
+*/
+
+.widget-dot {
+    /* Reset transform for absolute positioning to be accurate */
+    transform: none;
+    /* But we want the center of the dot to be at the coordinate? 
+       Or the corner? Let's say center for the dot visual */
+    margin-top: -10px;
+    margin-left: -10px;
+}
+
+/* If right/bottom are set, we need to adjust visual margins to flip? 
+   Let's keep it simple: the dot represents the button center.
+*/
+
+
+.pulse {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background-color: var(--primary);
+    animation: pulse-animation 2s infinite;
+    opacity: 0.5;
+    z-index: -1;
+}
+
+@keyframes pulse-animation {
+    0% {
+        transform: scale(1);
+        opacity: 0.5;
+    }
+
+    100% {
+        transform: scale(2.5);
+        opacity: 0;
+    }
+}
+
+.position-values {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.pos-badge {
+    background-color: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-family: monospace;
+}
+
+.picker-hint {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+}

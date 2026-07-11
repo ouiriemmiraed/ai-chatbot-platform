@@ -1,0 +1,45 @@
+.floating-button {
+    position: fixed;
+    /* bottom/right removed to allow inline styles override */
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: none;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+    z-index: 9998;
+}
+
+.floating-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.floating-button:active {
+    transform: scale(0.95);
+}
+
+.floating-icon-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    /* border-radius: 50%; remove this as user might upload non-circular logo with transparency */
+}
+
+/* On mobile the admin's absolute position_style (e.g. right:310px set for a
+   desktop layout) is applied inline and would push the launcher off to the
+   wrong side / off-screen. Pin it to the bottom-right corner here — !important
+   beats the (non-important) inline style. */
+@media (max-width: 480px) {
+    .floating-button {
+        bottom: 16px !important;
+        right: 16px !important;
+        left: auto !important;
+        top: auto !important;
+    }
+}

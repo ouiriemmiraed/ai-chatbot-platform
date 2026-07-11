@@ -1,0 +1,344 @@
+# Shared log-rotation policy. Without this, json-file logs grow unbounded and
+# can fill the disk (several containers had been up for weeks). Applied per
+# service below; takes effect when each container is next recreated.
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7
+    container_name: chatbot-mongodb
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          memory: 256M
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+    ports:
+      - "127.0.0.1:27018:27017" # Bind to localhost only for security
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - chatbot-network
+    restart: unless-stopped
+    command: --auth --wiredTigerCacheSizeGB 0.5 # Limiter le cache à 500 MB
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Backend API (FastAPI)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: chatbot-backend
+    logging: *default-logging
+    ports:
+      - "0.0.0.0:8001:8000"
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          memory: 1G
+    environment:
+      - MONGODB_URL=mongodb://admin:${MONGO_PASSWORD}@mongodb:27017
+      - SECRET_KEY=${SECRET_KEY:?SECRET_KEY must be set in .env file}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:3001,http://localhost:3002,http://localhost:3003}
+      - ENV=${ENV:-production}
+      - COOKIE_SECURE=${COOKIE_SECURE:-true}
+      - COOKIE_SAMESITE=${COOKIE_SAMESITE:-lax}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:?REDIS_PASSWORD must be set in .env file}@redis:6379/0
+      - CHROMA_DB_URL=http://chromadb:8000
+      - CHROMA_AUTH_TOKEN=${CHROMA_AUTH_TOKEN:?CHROMA_AUTH_TOKEN must be set in .env file}
+      - HF_TOKEN=${HF_TOKEN:-}
+      - HF_HOME=/app/.cache/huggingface
+      - TRANSFORMERS_CACHE=/app/.cache/huggingface/transformers
+      - SENTENCE_TRANSFORMERS_HOME=/app/.cache/huggingface/sentence-transformers
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-intfloat/multilingual-e5-small}
+      - RAG_CACHE_TTL=${RAG_CACHE_TTL:-300}
+      - SMTP_SERVER=${SMTP_SERVER:-smtp.gmail.com}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USERNAME=${SMTP_USERNAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SENDER_EMAIL=${SENDER_EMAIL}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
+      # Sprint C: tertiary fallback to local Ollama on host
+      - OLLAMA_URL=${OLLAMA_URL:-http://host.docker.internal:11434}
+      # Smaller/faster model so the CPU fallback returns its first token before
+      # the chain timeout (3b was ~77s on a real RAG prompt → always timed out;
+      # 1.5b is ~40s). Timeout raised to 60s to give it margin.
+      - OLLAMA_FALLBACK_MODEL=${OLLAMA_FALLBACK_MODEL:-qwen2.5:1.5b}
+      - LLM_FIRST_TOKEN_TIMEOUT_OLLAMA=${LLM_FIRST_TOKEN_TIMEOUT_OLLAMA:-60}
+      # Smart incremental re-scraping for scheduled auto re-scrapes (skip
+      # pinned/unchanged pages via ETag/content-hash/intervals). Manual crawls
+      # always do a full re-scrape regardless of this flag.
+      - SMART_RESCRAPE_ENABLED=${SMART_RESCRAPE_ENABLED:-true}
+      # The "Compiler et télécharger" admin button runs `npm run build:widget`
+      # inside THIS container. Without this var the build defaults to
+      # localhost:8000 and the embedded widget can't reach the API. Keep it in
+      # sync with the widget Dockerfile/admin REACT_APP_API_URL.
+      - REACT_APP_API_URL=${REACT_APP_API_URL:-http://93.127.136.248:8001}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      chromadb:
+        condition: service_started
+    networks:
+      - chatbot-network
+    restart: unless-stopped
+    volumes:
+      - ./backend/uploads:/app/uploads
+      - ./widget:/widget
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health')" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Admin Dashboard (React + Nginx) — exposed publicly on :3001
+  admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_API_URL: ${REACT_APP_API_URL:-http://93.127.136.248:8001}
+    container_name: chatbot-admin
+    logging: *default-logging
+    ports:
+      - "0.0.0.0:3001:3000"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          memory: 128M
+    environment:
+      - REACT_APP_API_URL=${REACT_APP_API_URL:-http://93.127.136.248:8001}
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - chatbot-network
+    restart: unless-stopped
+
+  # Widget - DÉSACTIVÉ (widget.bundle.js est un fichier statique, pas besoin de conteneur)
+  # Pour construire le widget: cd widget && npm run build:widget
+  # Le fichier widget.bundle.js sera dans widget/build/
+  # widget:
+  #   build:
+  #     context: ./widget
+  #     dockerfile: Dockerfile
+  #   container_name: chatbot-widget
+  #   ports:
+  #     - "3001:3001"
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: '0.5'
+  #         memory: 512M
+  #   environment:
+  #     - REACT_APP_API_URL=http://localhost:8000
+  #   depends_on:
+  #     backend:
+  #       condition: service_healthy
+  #   networks:
+  #     - chatbot-network
+  #   restart: unless-stopped
+
+  # Redis for Task Queue
+  redis:
+    image: redis:alpine
+    container_name: chatbot-redis
+    logging: *default-logging
+    command: redis-server --requirepass ${REDIS_PASSWORD:?REDIS_PASSWORD must be set in .env file} --maxmemory 256mb --maxmemory-policy allkeys-lru
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          memory: 128M
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - chatbot-network
+    restart: unless-stopped
+
+  # ChromaDB Vector Database
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: chatbot-chromadb
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          memory: 256M
+    expose:
+      - "8000"
+    volumes:
+      # chroma:latest persists to /data (the image default). The volume was
+      # previously mounted at the old /chroma/chroma path, so the live index sat
+      # on the container's ephemeral layer and every recreate would have wiped it
+      # (and the nightly backup tarred an empty volume). Mount at /data so the
+      # vector store is actually persisted and backed up.
+      - chroma_data:/data
+    environment:
+      - IS_PERSISTENT=TRUE
+      - CHROMA_SERVER_AUTH_CREDENTIALS=${CHROMA_AUTH_TOKEN:?CHROMA_AUTH_TOKEN must be set in .env file}
+      - CHROMA_SERVER_AUTH_PROVIDER=chromadb.auth.token_authn.TokenAuthenticationServerProvider
+    networks:
+      - chatbot-network
+    restart: unless-stopped
+
+  # Celery Worker — heavy crawl queue (Playwright + ML models loaded)
+  celery_crawl:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: chatbot-worker-crawl
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 6G
+        reservations:
+          memory: 512M
+    command: celery -A worker.celery_app worker -Q crawl --loglevel=info --concurrency=1 -n crawl@%h
+    healthcheck:
+      # Shell form so $HOSTNAME interpolates inside the container.
+      test: ["CMD-SHELL", "celery -A worker.celery_app inspect ping -d crawl@$$HOSTNAME --timeout 10 || exit 1"]
+      interval: 60s
+      timeout: 20s
+      retries: 3
+      start_period: 30s
+    environment:
+      - PYTHONPATH=/app
+      - MONGODB_URL=mongodb://admin:${MONGO_PASSWORD}@mongodb:27017
+      - SECRET_KEY=${SECRET_KEY:?SECRET_KEY must be set in .env file}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:?REDIS_PASSWORD must be set in .env file}@redis:6379/0
+      - CHROMA_DB_URL=http://chromadb:8000
+      - CHROMA_AUTH_TOKEN=${CHROMA_AUTH_TOKEN:?CHROMA_AUTH_TOKEN must be set in .env file}
+      - PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+      - HF_TOKEN=${HF_TOKEN:-}
+      - HF_HOME=/app/.cache/huggingface
+      - TRANSFORMERS_CACHE=/app/.cache/huggingface/transformers
+      - SENTENCE_TRANSFORMERS_HOME=/app/.cache/huggingface/sentence-transformers
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-intfloat/multilingual-e5-small}
+      - RAG_CACHE_TTL=${RAG_CACHE_TTL:-300}
+      - RAG_BATCH_SIZE=${RAG_BATCH_SIZE:-64}
+      - RAG_BULK_EMBED_BATCH=${RAG_BULK_EMBED_BATCH:-256}
+      - CRAWL_SOFT_TIME_LIMIT=7200
+      - CRAWL_HARD_TIME_LIMIT=14400
+    depends_on:
+      - redis
+      - chromadb
+      - mongodb
+    networks:
+      - chatbot-network
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # Celery Worker — light queue (alerts, webhooks, future emails). High
+  # concurrency, low memory; never holds Playwright or ML models.
+  celery_light:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: chatbot-worker-light
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          # Each prefork child imports rag_service → the embedding model + torch
+          # (heavy). At 1G with concurrency=5 the children OOM'd before the
+          # worker ever reached "ready" (silent crash-loop, 1500+ tasks piled
+          # up unprocessed). Fewer children + more headroom fixes it.
+          memory: 4G
+        reservations:
+          memory: 256M
+    command: celery -A worker.celery_app worker -Q light --loglevel=info --concurrency=2 -n light@%h
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A worker.celery_app inspect ping -d light@$$HOSTNAME --timeout 10 || exit 1"]
+      interval: 60s
+      timeout: 20s
+      retries: 3
+      start_period: 30s
+    environment:
+      - PYTHONPATH=/app
+      - MONGODB_URL=mongodb://admin:${MONGO_PASSWORD}@mongodb:27017
+      - SECRET_KEY=${SECRET_KEY:?SECRET_KEY must be set in .env file}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:?REDIS_PASSWORD must be set in .env file}@redis:6379/0
+      - CHROMA_DB_URL=http://chromadb:8000
+      - CHROMA_AUTH_TOKEN=${CHROMA_AUTH_TOKEN:?CHROMA_AUTH_TOKEN must be set in .env file}
+      # Embedding-model cache. Without these the user HOME is /nonexistent and
+      # sentence-transformers can't write its cache → content-gap clustering
+      # (which embeds questions) fails with "Permission denied: '/nonexistent'".
+      - HF_HOME=/app/.cache/huggingface
+      - TRANSFORMERS_CACHE=/app/.cache/huggingface/transformers
+      - SENTENCE_TRANSFORMERS_HOME=/app/.cache/huggingface/sentence-transformers
+      - SMTP_SERVER=${SMTP_SERVER:-smtp.gmail.com}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USERNAME=${SMTP_USERNAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SENDER_EMAIL=${SENDER_EMAIL}
+      # Analytics LLM fallback to local Ollama (classifier / quality judge /
+      # content-gap topic suggester) when Gemini + OpenRouter are exhausted.
+      - OLLAMA_URL=${OLLAMA_URL:-http://host.docker.internal:11434}
+      # Smaller/faster model so the CPU fallback returns its first token before
+      # the chain timeout (3b was ~77s on a real RAG prompt → always timed out;
+      # 1.5b is ~40s). Timeout raised to 60s to give it margin.
+      - OLLAMA_FALLBACK_MODEL=${OLLAMA_FALLBACK_MODEL:-qwen2.5:1.5b}
+      - LLM_FIRST_TOKEN_TIMEOUT_OLLAMA=${LLM_FIRST_TOKEN_TIMEOUT_OLLAMA:-60}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - redis
+      - mongodb
+    networks:
+      - chatbot-network
+    restart: unless-stopped
+
+networks:
+  chatbot-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+    driver: local
+  redis_data:
+    driver: local
+  chroma_data:
+    driver: local

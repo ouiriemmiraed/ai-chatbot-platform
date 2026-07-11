@@ -1,0 +1,575 @@
+.playground-page {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 64px);
+    box-sizing: border-box;
+}
+
+/* Header */
+.playground-header {
+    margin-bottom: 1.25rem;
+    flex-shrink: 0;
+}
+
+.playground-title {
+    font-size: 1.55rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin: 0 0 0.25rem;
+}
+
+.test-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    background: linear-gradient(135deg, #F6A623, #FF6584);
+    color: #fff;
+    border-radius: 20px;
+    padding: 0.2rem 0.65rem;
+    vertical-align: middle;
+}
+
+.playground-subtitle {
+    color: var(--text-secondary);
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+/* Loading / empty */
+.pg-loading,
+.pg-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: 1rem;
+    color: var(--text-secondary);
+}
+
+.pg-empty span {
+    font-size: 3rem;
+}
+
+/* Main layout */
+.playground-layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 1.25rem;
+    flex: 1;
+    min-height: 0;
+}
+
+/* Left panel */
+.playground-left {
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg, 12px);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    min-height: 0;
+}
+
+/* Config bar */
+.pg-config-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--background);
+    flex-shrink: 0;
+}
+
+.pg-config-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex: 1;
+    min-width: 180px;
+}
+
+.pg-config-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.pg-select,
+.pg-input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-primary);
+    padding: 0.35rem 0.7rem;
+    font-size: 0.84rem;
+    flex: 1;
+    /* inputs have an intrinsic min-width; without this the config rows can't
+       shrink and overflow the bar at every width (tablet + desktop too) */
+    min-width: 0;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.pg-select:focus,
+.pg-input:focus {
+    border-color: var(--primary);
+}
+
+.pg-reset-btn {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 6px;
+    padding: 0.38rem 0.85rem;
+    font-size: 0.82rem;
+    cursor: pointer;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background 0.2s;
+    flex-shrink: 0;
+}
+
+.pg-reset-btn:hover {
+    background: rgba(239, 68, 68, 0.18);
+}
+
+/* Messages */
+.pg-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.25rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    min-height: 0;
+}
+
+.pg-welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.pg-welcome-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.pg-welcome-title {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 1rem;
+    margin: 0;
+}
+
+.pg-welcome-sub {
+    font-size: 0.87rem;
+    margin: 0;
+    max-width: 280px;
+}
+
+/* Message bubbles */
+.pg-message {
+    display: flex;
+}
+
+.pg-message--user {
+    justify-content: flex-end;
+}
+
+.pg-message--assistant,
+.pg-message--error {
+    justify-content: flex-start;
+}
+
+.pg-bubble-wrap {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    max-width: 80%;
+}
+
+.pg-bot-avatar {
+    font-size: 1.3rem;
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+}
+
+.pg-bubble {
+    padding: 0.65rem 1rem;
+    border-radius: 14px;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    word-break: break-word;
+    max-width: 100%;
+}
+
+.pg-bubble--user {
+    background: var(--primary);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+    max-width: 70%;
+}
+
+.pg-bubble--assistant {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    border-bottom-left-radius: 4px;
+}
+
+.pg-bubble--error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: var(--danger);
+    border-radius: 10px;
+    font-size: 0.87rem;
+    max-width: 70%;
+}
+
+/* Typing indicator */
+.pg-bubble--typing {
+    padding: 0.75rem 1.1rem;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.pg-bubble--typing span {
+    width: 7px;
+    height: 7px;
+    background: var(--text-secondary);
+    border-radius: 50%;
+    animation: pg-bounce 1.2s infinite;
+}
+
+.pg-bubble--typing span:nth-child(2) { animation-delay: 0.2s; }
+.pg-bubble--typing span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes pg-bounce {
+    0%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-6px); }
+}
+
+/* Sources button */
+.pg-sources-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 0.5rem;
+    background: rgba(108, 99, 255, 0.1);
+    border: 1px solid rgba(108, 99, 255, 0.3);
+    color: var(--primary);
+    border-radius: 20px;
+    padding: 0.22rem 0.7rem;
+    font-size: 0.78rem;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.pg-sources-btn:hover,
+.pg-sources-btn.active {
+    background: rgba(108, 99, 255, 0.2);
+}
+
+.pg-answer {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+/* tidy rendered-markdown spacing inside answers */
+.pg-answer > :first-child { margin-top: 0; }
+.pg-answer > :last-child { margin-bottom: 0; }
+.pg-answer p { margin: 0 0 0.5rem; }
+.pg-answer ul, .pg-answer ol { margin: 0.25rem 0 0.5rem; padding-left: 1.25rem; }
+.pg-answer li { margin: 0.15rem 0; }
+.pg-answer a { color: var(--primary); word-break: break-word; }
+.pg-answer pre { white-space: pre-wrap; overflow-x: auto; }
+
+/* Input bar */
+.pg-input-bar {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.6rem;
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--border);
+    background: var(--background);
+    flex-shrink: 0;
+}
+
+.pg-textarea {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text-primary);
+    padding: 0.6rem 0.9rem;
+    font-size: 0.9rem;
+    resize: none;
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.2s;
+    line-height: 1.4;
+}
+
+.pg-textarea:focus {
+    border-color: var(--primary);
+}
+
+.pg-textarea:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pg-send-btn {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: opacity 0.2s, transform 0.15s;
+}
+
+.pg-send-btn:hover:not(:disabled) {
+    opacity: 0.88;
+    transform: scale(1.05);
+}
+
+.pg-send-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Right panel: Sources */
+.playground-right {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.sources-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg, 12px);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+}
+
+.sources-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.2rem;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.sources-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.sources-count {
+    font-size: 0.78rem;
+    background: rgba(108, 99, 255, 0.12);
+    color: var(--primary);
+    border-radius: 12px;
+    padding: 0.18rem 0.6rem;
+    font-weight: 600;
+}
+
+.sources-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.5rem;
+    gap: 0.75rem;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.sources-empty span {
+    font-size: 2rem;
+}
+
+.sources-empty p {
+    font-size: 0.85rem;
+    margin: 0;
+    max-width: 220px;
+    line-height: 1.5;
+}
+
+/* Sources list */
+.sources-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.source-item {
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem;
+}
+
+.source-item-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 0.3rem;
+}
+
+.source-index {
+    font-size: 0.72rem;
+    font-weight: 700;
+    background: var(--primary);
+    color: #fff;
+    border-radius: 4px;
+    padding: 0.1rem 0.4rem;
+    flex-shrink: 0;
+}
+
+.source-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    word-break: break-word;
+}
+
+.source-url {
+    margin-bottom: 0.4rem;
+}
+
+.source-url a {
+    font-size: 0.75rem;
+    color: var(--primary);
+    text-decoration: none;
+    word-break: break-all;
+}
+
+.source-url a:hover {
+    text-decoration: underline;
+}
+
+.source-content {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+/* Session info */
+.session-info {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.6rem 1rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.77rem;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.session-info code {
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.1rem 0.4rem;
+    font-family: monospace;
+    font-size: 0.77rem;
+    color: var(--text-primary);
+}
+
+.session-msg-count {
+    margin-left: auto;
+    background: rgba(108, 99, 255, 0.1);
+    color: var(--primary);
+    border-radius: 10px;
+    padding: 0.1rem 0.5rem;
+    font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .playground-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .playground-right {
+        min-height: 280px;
+    }
+
+    .playground-page {
+        height: auto;
+    }
+
+    /* the page becomes height:auto on mobile, which collapses the flex:1 chat
+       area to its content (~175px). Give it a usable height so the conversation
+       isn't a cramped sliver above the sources panel. */
+    .playground-left {
+        min-height: 60vh;
+    }
+
+    .pg-messages {
+        min-height: 40vh;
+    }
+}
+
+@media (max-width: 600px) {
+    .playground-page {
+        padding: 1rem;
+    }
+
+    .pg-config-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .pg-config-row {
+        min-width: 0;
+    }
+
+    /* inputs have an intrinsic min-width that pushed the config bar ~10px past
+       the panel (clipped by playground-left); let them shrink to the row */
+    .pg-select,
+    .pg-input {
+        min-width: 0;
+        width: 100%;
+    }
+}

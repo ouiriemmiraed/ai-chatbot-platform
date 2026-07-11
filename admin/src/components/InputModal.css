@@ -1,0 +1,45 @@
+/* InputModal.css - Extends ConfirmationModal styles */
+
+.input-modal {
+    max-width: 450px;
+}
+
+.modal-message {
+    margin-bottom: 1rem;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.modal-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    outline: none;
+    background-color: var(--surface-hover);
+    color: var(--text-primary);
+}
+
+.modal-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb),0.10);
+    background-color: var(--surface);
+}
+
+.modal-input::placeholder {
+    color: var(--text-tertiary);
+}
+
+/* ===== Keyboard focus ring (audit fix) ===== */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible,
+[tabindex]:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb, 79, 70, 229), 0.30);
+}

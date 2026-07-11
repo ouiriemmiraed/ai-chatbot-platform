@@ -1,0 +1,370 @@
+.documents-container {
+    padding: 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.documents-container.embedded-documents {
+    padding: 0;
+    max-width: none;
+}
+
+.documents-header {
+    margin-bottom: 1.5rem;
+}
+
+.documents-header h1 {
+    margin: 0 0 0.25rem;
+    font-size: 1.75rem;
+    color: var(--text-primary);
+}
+
+.documents-header p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.chatbot-selector {
+    margin-bottom: 1.25rem;
+}
+
+.chatbot-selector label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.chatbot-tabs {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.chatbot-tab {
+    padding: 0.45rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.chatbot-tab:hover {
+    background: var(--background);
+}
+
+.chatbot-tab.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+}
+
+/* Drop zone */
+.dropzone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    margin-bottom: 1.5rem;
+    background: var(--surface);
+}
+
+.dropzone:hover:not(.uploading) {
+    border-color: var(--primary);
+    background: var(--background);
+}
+
+.dropzone.drag-active {
+    border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 8%, transparent);
+}
+
+.dropzone.uploading {
+    cursor: default;
+    opacity: 0.7;
+}
+
+.dropzone-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dropzone-icon {
+    font-size: 2rem;
+}
+
+.dropzone-main {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.dropzone-sub {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.upload-spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Table */
+.docs-table-wrapper {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    /* allow the wide table to scroll horizontally on mobile instead of being clipped */
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    box-shadow: var(--shadow-sm);
+}
+
+.docs-loading,
+.docs-empty {
+    padding: 3rem 2rem;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.docs-empty-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.docs-empty h3 {
+    margin: 0 0 0.4rem;
+    color: var(--text-primary);
+}
+
+.docs-empty p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.docs-table {
+    width: 100%;
+    min-width: 520px;
+    border-collapse: collapse;
+}
+
+/* ===== Mobile: stack the table into cards ===== */
+@media (max-width: 640px) {
+    .docs-table-wrapper { overflow-x: visible; }
+    .docs-table { min-width: 0; }
+    .docs-table thead { display: none; }
+    .docs-table, .docs-table tbody { display: block; width: 100%; }
+    .docs-table tr {
+        display: block;
+        padding: 4px 14px;
+        border-bottom: 1px solid var(--border);
+    }
+    .docs-table tbody tr:last-child { border-bottom: none; }
+    .docs-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 9px 0;
+        border: none;
+        border-bottom: 1px solid var(--border);
+        text-align: right;
+        font-size: 0.9rem;
+    }
+    .docs-table tr td:last-child { border-bottom: none; }
+    .docs-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-align: left;
+        flex-shrink: 0;
+    }
+    /* keep the filename (icon + name) left-aligned and wrapping */
+    .docs-table td.doc-name { text-align: left; flex-wrap: wrap; }
+}
+
+.docs-table thead th {
+    background: var(--background);
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border);
+}
+
+.docs-table tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+}
+
+.docs-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.docs-table tbody tr:hover {
+    background: var(--background);
+}
+
+.docs-table td {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    vertical-align: middle;
+}
+
+.doc-name {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+
+.doc-icon {
+    font-size: 1.1rem;
+}
+
+.doc-date {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.ext-badge {
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.1rem 0.45rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.chunks-badge {
+    background: #dbeafe;
+    color: #1d4ed8;
+    border-radius: 999px;
+    padding: 0.15rem 0.55rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.delete-doc-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    padding: 0.3rem 0.55rem;
+    font-size: 0.85rem;
+    transition: background 0.15s;
+}
+
+.delete-doc-btn:hover {
+    background: #fee2e2;
+    border-color: var(--danger);
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-box {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+}
+
+.modal-box h2 {
+    margin: 0 0 0.75rem;
+    font-size: 1.2rem;
+    color: var(--text-primary);
+}
+
+.modal-box p {
+    margin: 0 0 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.delete-warning {
+    color: var(--danger) !important;
+    font-size: 0.85rem !important;
+    margin-top: 0.5rem !important;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.btn-secondary {
+    padding: 0.5rem 1.25rem;
+    background: var(--background);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.btn-secondary:hover {
+    background: var(--surface);
+}
+
+.btn-danger {
+    padding: 0.5rem 1.25rem;
+    background: var(--danger);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: opacity 0.2s;
+}
+
+.btn-danger:hover {
+    opacity: 0.85;
+}
+
+
+/* ===== Keyboard focus ring (audit fix) ===== */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible,
+[tabindex]:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb, 79, 70, 229), 0.30);
+}
